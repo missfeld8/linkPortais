@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Gerenciador de Sites</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="logo">
+    <img src="assets/logo.jpeg" alt="Logo">
+    <span>Gerenciador de Sites</span>
+  </div>
+
+  <button id="openFilters">Filtros</button>
+</header>
+
+<main class="container">
+
+  <!-- STATS -->
+  <section class="stats">
+    <div class="stat">
+      <strong id="statSites">0</strong>
+      <span>Total de Sites</span>
+    </div>
+    <div class="stat">
+      <strong id="statNichos">0</strong>
+      <span>Categorias</span>
+    </div>
+    <div class="stat">
+      <strong id="statDA">0</strong>
+      <span>DA Médio</span>
+    </div>
+  </section>
+
+  <!-- BUSCA -->
+  <div class="search">
+    <input
+      id="searchInput"
+      type="text"
+      placeholder="Buscar por nome, URL, categoria, contato..."
+    >
+  </div>
+
+  <!-- TABELA -->
+  <div class="table-wrapper">
+    <table>
+      <thead>
+        <tr>
+          <th>Nome</th>
+          <th>Categorias</th>
+          <th>URL</th>
+          <th>DA</th>
+          <th>DR</th>
+          <th>Spam</th>
+          <th>Qtd. Artigos</th>
+          <th>Preço Pacote</th>
+          <th>Preço Unitário</th>
+          <th>Contato</th>
+          <th>WhatsApp</th>
+        </tr>
+      </thead>
+
+      <tbody id="tableBody">
+        <!-- JS injeta as linhas aqui -->
+      </tbody>
+    </table>
+  </div>
+
+</main>
+
+<!-- DRAWER DE FILTROS -->
+<aside class="filters" id="filters">
+  <h3>Filtros Avançados</h3>
+
+  <div class="filter-group">
+    <strong>Categorias</strong>
+    <div id="nichoFilters"></div>
+  </div>
+
+  <div class="filter-group">
+    <label for="daMin">DA mínimo</label>
+    <input type="range" id="daMin" min="0" max="100" value="0">
+  </div>
+
+  <div class="filter-group">
+    <label for="drMin">DR mínimo</label>
+    <input type="range" id="drMin" min="0" max="100" value="0">
+  </div>
+
+  <button id="applyFilters">Aplicar filtros</button>
+</aside>
+
+<script src="assets/js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,198 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Inter, Arial, sans-serif;
+  background: #f4f6f8;
+  color: #1f2937;
+}
+
+/* ================= TOPBAR ================= */
+
+.topbar {
+  height: 64px;
+  background: #0f172a;
+  color: #fff;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 24px;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logo img {
+  height: 36px;
+}
+
+/* botão filtros */
+.topbar button {
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+/* ================= CONTAINER ================= */
+
+.container {
+  padding: 24px;
+}
+
+/* ================= STATS ================= */
+
+.stats {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.stat {
+  background: #fff;
+  padding: 16px;
+  border-radius: 10px;
+  width: 180px;
+}
+
+.stat strong {
+  font-size: 28px;
+  display: block;
+}
+
+/* ================= SEARCH ================= */
+
+.search input {
+  width: 100%;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  margin-bottom: 16px;
+}
+
+/* ================= TABLE ================= */
+
+.table-wrapper {
+  background: #fff;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th {
+  background: #f9fafb;
+  text-align: left;
+  padding: 12px;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+td {
+  padding: 12px;
+  border-top: 1px solid #e5e7eb;
+  vertical-align: top;
+}
+
+td a {
+  color: #2563eb;
+  text-decoration: none;
+}
+
+td a:hover {
+  text-decoration: underline;
+}
+
+/* ================= TAGS / NICHOS ================= */
+
+.tag {
+  display: inline-block;
+  background: #e5edff;
+  color: #1d4ed8;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  margin: 2px 4px 2px 0;
+  white-space: nowrap;
+}
+
+/* ================= PREÇOS ================= */
+
+.price-main {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.price-unit {
+  font-size: 12px;
+  color: #6b7280;
+  margin-top: 4px;
+}
+
+/* ================= FILTER DRAWER ================= */
+
+.filters {
+  position: fixed;
+  right: -320px;
+  top: 0;
+  width: 320px;
+  height: 100%;
+  background: #fff;
+  box-shadow: -10px 0 20px rgba(0,0,0,.1);
+  padding: 20px;
+  transition: right .3s;
+  overflow-y: auto;
+  z-index: 1000;
+}
+
+.filters.open {
+  right: 0;
+}
+
+.filters h3 {
+  margin-top: 0;
+  margin-bottom: 16px;
+}
+
+.filter-group {
+  margin-bottom: 20px;
+}
+
+.filter-group strong {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+.filter-group label {
+  display: block;
+  font-size: 14px;
+  margin-bottom: 6px;
+  cursor: pointer;
+}
+
+.filters input[type="range"] {
+  width: 100%;
+}
+
+.filters button {
+  width: 100%;
+  padding: 12px;
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+}
