@@ -1,5 +1,5 @@
 const API_URL =
-  'https://script.google.com/macros/s/AKfycbwl9J5R3otD7LNw_SRDux0OwAKWHpd3JAWemI1XMemPks5lyQx-JT47qSGMqyMd_zJh/exec';
+  'https://script.google.com/macros/s/AKfycbzbjJ0ypZ44ljNBwK5-zJ5q-94I7xGnL0X697qza2s5YuSisczn731YfA9CIeKI0ZST/exec';
 
 let sites = [];
 let filtered = [];
