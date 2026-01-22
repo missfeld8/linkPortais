@@ -7,6 +7,7 @@ body {
   font-family: Inter, Arial, sans-serif;
   background: #f4f6f8;
   color: #1f2937;
+  transition: background .3s, color .3s;
 }
 
 /* ================= TOPBAR ================= */
@@ -31,7 +32,12 @@ body {
   height: 36px;
 }
 
-/* botão filtros */
+.topbar .actions {
+  display: flex;
+  gap: 10px;
+}
+
+/* botões */
 .topbar button {
   background: #2563eb;
   color: #fff;
@@ -40,6 +46,10 @@ body {
   border-radius: 8px;
   cursor: pointer;
   font-weight: 500;
+}
+
+#toggleTheme {
+  background: #334155;
 }
 
 /* ================= CONTAINER ================= */
@@ -114,7 +124,7 @@ td a:hover {
   text-decoration: underline;
 }
 
-/* ================= TAGS / NICHOS ================= */
+/* ================= TAGS ================= */
 
 .tag {
   display: inline-block;
@@ -151,7 +161,7 @@ td a:hover {
   background: #fff;
   box-shadow: -10px 0 20px rgba(0,0,0,.1);
   padding: 20px;
-  transition: right .3s;
+  transition: right .3s, background .3s;
   overflow-y: auto;
   z-index: 1000;
 }
@@ -195,4 +205,70 @@ td a:hover {
   border-radius: 8px;
   font-size: 14px;
   cursor: pointer;
+}
+
+/* ==================================================
+   🌙 DARK MODE
+================================================== */
+
+body.dark {
+  background: #020617;
+  color: #e5e7eb;
+}
+
+/* topbar */
+body.dark .topbar {
+  background: #020617;
+}
+
+/* cards */
+body.dark .stat {
+  background: #020617;
+  border: 1px solid #1e293b;
+}
+
+/* search */
+body.dark .search input {
+  background: #020617;
+  border: 1px solid #1e293b;
+  color: #e5e7eb;
+}
+
+/* table */
+body.dark .table-wrapper {
+  background: #020617;
+  border: 1px solid #1e293b;
+}
+
+body.dark th {
+  background: #020617;
+}
+
+body.dark td {
+  border-top: 1px solid #1e293b;
+}
+
+body.dark td a {
+  color: #60a5fa;
+}
+
+/* tags */
+body.dark .tag {
+  background: #1e293b;
+  color: #93c5fd;
+}
+
+/* prices */
+body.dark .price-unit {
+  color: #94a3b8;
+}
+
+/* filters drawer */
+body.dark .filters {
+  background: #020617;
+}
+
+body.dark .filters input,
+body.dark .filters label {
+  color: #e5e7eb;
 }
