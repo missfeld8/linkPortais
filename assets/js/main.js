@@ -8,7 +8,7 @@ let filtered = [];
    PAGINAÇÃO
 ========================= */
 let currentPage = 1;
-const perPage = 20;
+const perPage = 100;
 
 /* =========================
    CONTROLE DE ESTADO
