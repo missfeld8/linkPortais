@@ -2,6 +2,10 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
+
+  <!-- IMPORTANTE PARA MOBILE -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <title>Gerenciador de Sites</title>
   <link rel="stylesheet" href="assets/css/style.css">
 </head>
@@ -9,13 +13,14 @@
 
 <header class="topbar">
   <div class="logo">
-    <img src="assets/logo.jpeg" alt="Logo">
+    <!-- LOGO -->
+    <img src="assets/img/logo.jpeg" alt="Logo" class="logo-img">
     <span>Gerenciador de Sites</span>
   </div>
 
   <div class="actions">
-    <button id="toggleTheme" title="Alternar tema">🌙</button>
-    <button id="openFilters">Filtros</button>
+    <button id="toggleTheme" type="button">🌙</button>
+    <button id="openFilters" type="button">Filtros</button>
   </div>
 </header>
 
@@ -42,7 +47,8 @@
     <input
       id="searchInput"
       type="text"
-      placeholder="Buscar por nome, URL, categoria, contato..."
+      placeholder="Buscar por nome, url, categoria..."
+      autocomplete="off"
     >
   </div>
 
@@ -58,44 +64,147 @@
           <th>DA</th>
           <th>DR</th>
           <th>Spam</th>
-          <th>Qtd. Artigos</th>
+          <th>Qtd</th>
           <th>Preço Pacote</th>
-          <th>Preço Unitário</th>
+          <th>Preço Unit.</th>
           <th>Contato</th>
           <th>WhatsApp</th>
         </tr>
       </thead>
-
-      <tbody id="tableBody">
-        <!-- JS injeta as linhas aqui -->
-      </tbody>
+      <tbody id="tableBody"></tbody>
     </table>
   </div>
 
+  <!-- PAGINAÇÃO -->
+  <div id="pagination"></div>
+
 </main>
 
-<!-- DRAWER DE FILTROS -->
+<!-- ================= FILTROS ================= -->
 <aside class="filters" id="filters">
-  <h3>Filtros Avançados</h3>
 
+  <!-- HEADER -->
+  <div class="filters-header">
+    <h3>Filtros Avançados</h3>
+    <button id="closeFilters" class="close-filters" type="button" aria-label="Fechar filtros">✕</button>
+  </div>
+
+  <!-- ESTADO -->
+  <div class="filter-group">
+    <strong>Estado</strong>
+    <select id="estadoFiltro">
+      <option value="">Todos</option>
+    </select>
+  </div>
+
+  <!-- CATEGORIAS (MULTISELECT PROFISSIONAL) -->
   <div class="filter-group">
     <strong>Categorias</strong>
-    <div id="nichoFilters"></div>
+
+    <!-- Campo principal -->
+    <div class="custom-multiselect" id="categoriaSelect">
+      <span id="categoriaPlaceholder">Selecionar categorias</span>
+      <span class="arrow">▾</span>
+    </div>
+
+    <!-- Lista dropdown -->
+    <div class="multiselect-options" id="categoriaOptions"></div>
+
+    <!-- Selecionadas -->
+    <div class="selected-tags" id="categoriaTags"></div>
   </div>
 
+  <!-- DA -->
   <div class="filter-group">
-    <label for="daMin">DA mínimo</label>
-    <input type="range" id="daMin" min="0" max="100" value="0">
+    <strong>Domain Authority (DA)</strong>
+
+    <div class="range-inputs">
+      <input type="number" id="daMin" min="0" max="100" value="0">
+      <span>até</span>
+      <input type="number" id="daMax" min="0" max="100" value="100">
+    </div>
+
+    <input type="range" id="daRange" min="0" max="100" value="100">
+    <small>Máx selecionado: <strong id="daValue">100</strong></small>
   </div>
 
+  <!-- DR -->
   <div class="filter-group">
-    <label for="drMin">DR mínimo</label>
-    <input type="range" id="drMin" min="0" max="100" value="0">
+    <strong>Domain Rating (DR)</strong>
+
+    <div class="range-inputs">
+      <input type="number" id="drMin" min="0" max="100" value="0">
+      <span>até</span>
+      <input type="number" id="drMax" min="0" max="100" value="100">
+    </div>
+
+    <input type="range" id="drRange" min="0" max="100" value="100">
+    <small>Máx selecionado: <strong id="drValue">100</strong></small>
   </div>
 
-  <button id="applyFilters">Aplicar filtros</button>
+  <!-- PREÇO PACOTE -->
+  <div class="filter-group">
+    <strong>Preço do Pacote (R$)</strong>
+    <div class="range-inputs">
+      <input type="number" id="precoMin" value="0" min="0">
+      <span>até</span>
+      <input type="number" id="precoMax" value="999999" min="0">
+    </div>
+  </div>
+
+  <!-- PREÇO UNITÁRIO -->
+  <div class="filter-group">
+    <strong>Preço Unitário (R$)</strong>
+    <div class="range-inputs">
+      <input type="number" id="unitMin" value="0" min="0">
+      <span>até</span>
+      <input type="number" id="unitMax" value="999999" min="0">
+    </div>
+  </div>
+
+  <!-- QUANTIDADE -->
+  <div class="filter-group">
+    <strong>Quantidade de Artigos</strong>
+    <div class="range-inputs">
+      <input type="number" id="qtdMin" value="1" min="1">
+      <span>até</span>
+      <input type="number" id="qtdMax" value="999" min="1">
+    </div>
+  </div>
+
+  <!-- AÇÕES -->
+  <div class="filter-actions">
+    <button id="clearFilters" type="button">Limpar filtros</button>
+    <button id="applyFilters" type="button">Aplicar filtros</button>
+  </div>
+
 </aside>
 
 <script src="assets/js/main.js"></script>
+
+
+<!-- ================= SYNC RANGE + INPUT ================= -->
+<script>
+  // DA
+  const daRange = document.getElementById('daRange');
+  const daMax = document.getElementById('daMax');
+  const daValue = document.getElementById('daValue');
+
+  daRange.addEventListener('input', () => {
+    daMax.value = daRange.value;
+    daValue.innerText = daRange.value;
+  });
+
+  // DR
+  const drRange = document.getElementById('drRange');
+  const drMax = document.getElementById('drMax');
+  const drValue = document.getElementById('drValue');
+
+  drRange.addEventListener('input', () => {
+    drMax.value = drRange.value;
+    drValue.innerText = drRange.value;
+  });
+</script>
+
 </body>
 </html>

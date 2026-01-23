@@ -5,181 +5,88 @@ let sites = [];
 let filtered = [];
 
 /* =========================
-   JSONP CALLBACK
+   PAGINAÇÃO
 ========================= */
-function handleData(data) {
-  if (!Array.isArray(data)) {
-    console.error('Resposta inválida:', data);
-    return;
+let currentPage = 1;
+const perPage = 20;
+
+/* =========================
+   CONTROLE DE ESTADO
+========================= */
+let domReady = false;
+let dataReady = false;
+
+/* =========================
+   VARIÁVEIS UI
+========================= */
+let filtersBox;
+let selectBox;
+let optionsBox;
+let tagsBox;
+let placeholder;
+
+let categoriasSelecionadas = [];
+
+/* =========================
+   DOM READY
+========================= */
+document.addEventListener('DOMContentLoaded', () => {
+  domReady = true;
+
+  filtersBox = document.getElementById('filters');
+  selectBox = document.getElementById('categoriaSelect');
+  optionsBox = document.getElementById('categoriaOptions');
+  tagsBox = document.getElementById('categoriaTags');
+  placeholder = document.getElementById('categoriaPlaceholder');
+
+  /* MULTISELECT */
+  selectBox.addEventListener('click', () => {
+    optionsBox.classList.toggle('open');
+  });
+
+  document.addEventListener('click', e => {
+    if (!selectBox.contains(e.target) && !optionsBox.contains(e.target)) {
+      optionsBox.classList.remove('open');
+    }
+  });
+
+  /* EVENTS */
+  document.getElementById('searchInput').addEventListener('input', () => {
+    currentPage = 1;
+    applyFilters();
+  });
+
+  document.getElementById('applyFilters').addEventListener('click', () => {
+    currentPage = 1;
+    applyFilters();
+    closeFilters();
+  });
+
+  document.getElementById('clearFilters').addEventListener('click', clearFilters);
+
+  document.getElementById('openFilters').addEventListener('click', () => {
+    filtersBox.classList.toggle('open');
+  });
+
+  document.getElementById('closeFilters').addEventListener('click', closeFilters);
+
+  /* 🌙 DARK MODE */
+  const toggleTheme = document.getElementById('toggleTheme');
+
+  toggleTheme.addEventListener('click', () => {
+    document.body.classList.toggle('dark');
+    localStorage.setItem(
+      'theme',
+      document.body.classList.contains('dark') ? 'dark' : 'light'
+    );
+  });
+
+  if (localStorage.getItem('theme') === 'dark') {
+    document.body.classList.add('dark');
   }
 
-  sites = data;
-  filtered = [...data];
-
-  render();
-  updateStats();
-  buildCategoriaFilters();
-}
-
-/* =========================
-   LOAD DATA (JSONP)
-========================= */
-(function loadSites() {
-  const script = document.createElement('script');
-  script.src = `${API_URL}?callback=handleData`;
-  script.onerror = () =>
-    console.error('Erro ao carregar dados da planilha');
-  document.body.appendChild(script);
-})();
-
-/* =========================
-   SEARCH
-========================= */
-document.getElementById('searchInput').addEventListener('input', e => {
-  const q = e.target.value.toLowerCase();
-
-  filtered = sites.filter(s =>
-    s.nome.toLowerCase().includes(q) ||
-    s.url.toLowerCase().includes(q) ||
-    s.categorias.some(c => c.includes(q)) ||
-    (s.contato && s.contato.toLowerCase().includes(q)) ||
-    (s.whatsapp && s.whatsapp.toLowerCase().includes(q))
-  );
-
-  render();
+  if (dataReady) inicializarSistema();
 });
-
-/* =========================
-   DRAWER
-========================= */
-document.getElementById('openFilters').onclick = () => {
-  document.getElementById('filters').classList.toggle('open');
-};
-
-/* =========================
-   HELPERS
-========================= */
-function renderContato(valor) {
-  if (!valor) return '-';
-
-  const text = valor.toString().trim();
-
-  // email
-  if (text.includes('@')) {
-    return `<a href="mailto:${text}">${text}</a>`;
-  }
-
-  // whatsapp
-  const phone = text.replace(/\D/g, '');
-  if (phone.length >= 8) {
-    return `
-      <a href="https://wa.me/55${phone}" target="_blank">
-        📱 ${text}
-      </a>
-    `;
-  }
-
-  return text;
-}
-
-/* =========================
-   RENDER TABLE
-========================= */
-function render() {
-  const tbody = document.getElementById('tableBody');
-  tbody.innerHTML = '';
-
-  filtered.forEach(s => {
-    const quantidade = Number(s.quantidade) || 1;
-    const preco = Number(s.preco) || 0;
-
-    const unit =
-      quantidade > 1 ? (preco / quantidade).toFixed(2) : null;
-
-    const url = s.url
-      ? s.url.startsWith('http')
-        ? s.url
-        : `https://${s.url}`
-      : '#';
-
-    tbody.innerHTML += `
-      <tr>
-        <td>${s.nome || '-'}</td>
-
-        <td>
-          ${s.categorias.length
-            ? s.categorias.map(c => `<span class="tag">${c}</span>`).join('')
-            : '-'}
-        </td>
-
-        <td>
-          ${s.url ? `<a href="${url}" target="_blank">${s.url}</a>` : '-'}
-        </td>
-
-        <td>${s.da || 0}</td>
-        <td>${s.dr || 0}</td>
-        <td>${s.spam || 0}%</td>
-
-        <td>${quantidade}</td>
-
-        <td class="price-main">
-          R$ ${preco.toFixed(2)}
-        </td>
-
-        <td class="price-unit">
-          ${unit ? `R$ ${unit}/artigo` : '-'}
-        </td>
-
-        <td>${renderContato(s.contato)}</td>
-        <td>${renderContato(s.whatsapp)}</td>
-      </tr>
-    `;
-  });
-}
-
-/* =========================
-   STATS
-========================= */
-function updateStats() {
-  document.getElementById('statSites').innerText = sites.length;
-
-  const categorias = new Set();
-  let totalDA = 0;
-
-  sites.forEach(s => {
-    s.categorias.forEach(c => categorias.add(c));
-    totalDA += Number(s.da) || 0;
-  });
-
-  document.getElementById('statNichos').innerText = categorias.size;
-  document.getElementById('statDA').innerText =
-    Math.round(totalDA / sites.length) || 0;
-}
-
-/* =========================
-   CATEGORIA FILTER BUILDER
-========================= */
-function buildCategoriaFilters() {
-  const box = document.getElementById('nichoFilters');
-  box.innerHTML = '';
-
-  const set = new Set();
-  sites.forEach(s => s.categorias.forEach(c => set.add(c)));
-
-  [...set].sort().forEach(cat => {
-    box.innerHTML += `
-      <label>
-        <input type="checkbox" value="${cat}"> ${cat}
-      </label>
-    `;
-  });
-}
-
-const API_URL =
-  'https://script.google.com/macros/s/AKfycbwl9J5R3otD7LNw_SRDux0OwAKWHpd3JAWemI1XMemPks5lyQx-JT47qSGMqyMd_zJh/exec';
-
-let sites = [];
-let filtered = [];
 
 /* =========================
    JSONP CALLBACK
@@ -193,9 +100,18 @@ function handleData(data) {
   sites = data;
   filtered = [...data];
 
-  render();
-  updateStats();
+  dataReady = true;
+
+  if (domReady) inicializarSistema();
+}
+
+/* =========================
+   INICIALIZAÇÃO SEGURA
+========================= */
+function inicializarSistema() {
   buildCategoriaFilters();
+  buildEstadoFilters();
+  applyFilters();
 }
 
 /* =========================
@@ -204,74 +120,199 @@ function handleData(data) {
 (function loadSites() {
   const script = document.createElement('script');
   script.src = `${API_URL}?callback=handleData`;
-  script.onerror = () =>
-    console.error('Erro ao carregar dados da planilha');
   document.body.appendChild(script);
 })();
 
 /* =========================
-   SEARCH
-========================= */
-document.getElementById('searchInput').addEventListener('input', e => {
-  const q = e.target.value.toLowerCase();
-
-  filtered = sites.filter(s =>
-    s.nome.toLowerCase().includes(q) ||
-    s.url.toLowerCase().includes(q) ||
-    s.categorias.some(c => c.includes(q)) ||
-    (s.contato && s.contato.toLowerCase().includes(q)) ||
-    (s.whatsapp && s.whatsapp.toLowerCase().includes(q))
-  );
-
-  render();
-});
-
-/* =========================
-   DRAWER
-========================= */
-document.getElementById('openFilters').onclick = () => {
-  document.getElementById('filters').classList.toggle('open');
-};
-
-/* =========================
    HELPERS
 ========================= */
-function renderContato(valor) {
-  if (!valor) return '-';
+function getValue(id, fallback) {
+  const el = document.getElementById(id);
+  return el && el.value !== '' ? Number(el.value) : fallback;
+}
 
-  const text = valor.toString().trim();
+function getText(id) {
+  const el = document.getElementById(id);
+  return el ? el.value.trim().toLowerCase() : '';
+}
 
-  // email
-  if (text.includes('@')) {
-    return `<a href="mailto:${text}">${text}</a>`;
-  }
-
-  // whatsapp
-  const phone = text.replace(/\D/g, '');
-  if (phone.length >= 8) {
-    return `
-      <a href="https://wa.me/55${phone}" target="_blank">
-        📱 ${text}
-      </a>
-    `;
-  }
-
-  return text;
+/* 🔥 NORMALIZA TEXTO (CORRIGE ACENTOS, ESPAÇOS, MAIÚSCULAS) */
+function normalizeText(text) {
+  return (text || '')
+    .toString()
+    .toLowerCase()
+    .trim()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '');
 }
 
 /* =========================
-   RENDER TABLE
+   APPLY FILTERS
+========================= */
+function applyFilters() {
+  const q = getText('searchInput');
+
+  const estadoFiltro = normalizeText(
+    document.getElementById('estadoFiltro').value
+  );
+
+  const daMin = getValue('daMin', 0);
+  const daMax = getValue('daMax', 100);
+
+  const drMin = getValue('drMin', 0);
+  const drMax = getValue('drMax', 100);
+
+  const precoMin = getValue('precoMin', 0);
+  const precoMax = getValue('precoMax', 999999);
+
+  const unitMin = getValue('unitMin', 0);
+  const unitMax = getValue('unitMax', 999999);
+
+  const qtdMin = getValue('qtdMin', 1);
+  const qtdMax = getValue('qtdMax', 999);
+
+  filtered = sites.filter(s => {
+    const nome = normalizeText(s.nome);
+    const url = normalizeText(s.url);
+    const estado = normalizeText(s.estado);
+    const categorias = s.categorias || [];
+
+    const quantidade = Number(s.quantidade) || 1;
+    const precoPacote = Number(s.preco) || 0;
+    const precoUnit = precoPacote / quantidade;
+
+    /* BUSCA */
+    if (
+      q &&
+      !(
+        nome.includes(q) ||
+        url.includes(q) ||
+        estado.includes(q) ||
+        categorias.some(c => normalizeText(c).includes(q))
+      )
+    ) return false;
+
+    /* ESTADO (AGORA FUNCIONA PERFEITO) */
+    if (estadoFiltro && estado !== estadoFiltro) return false;
+
+    /* CATEGORIAS */
+    if (
+      categoriasSelecionadas.length &&
+      !categoriasSelecionadas.some(c => categorias.includes(c))
+    ) return false;
+
+    /* MÉTRICAS */
+    if (+s.da < daMin || +s.da > daMax) return false;
+    if (+s.dr < drMin || +s.dr > drMax) return false;
+
+    /* PREÇOS */
+    if (precoPacote < precoMin || precoPacote > precoMax) return false;
+    if (precoUnit < unitMin || precoUnit > unitMax) return false;
+
+    /* QUANTIDADE */
+    if (quantidade < qtdMin || quantidade > qtdMax) return false;
+
+    return true;
+  });
+
+  render();
+  updateStats();
+  renderPagination();
+}
+
+/* =========================
+   BUILD CATEGORIAS
+========================= */
+function buildCategoriaFilters() {
+  optionsBox.innerHTML = '';
+  categoriasSelecionadas = [];
+  tagsBox.innerHTML = '';
+  placeholder.innerText = 'Selecionar categorias';
+
+  const set = new Set();
+  sites.forEach(s => s.categorias?.forEach(c => set.add(c)));
+
+  [...set].sort().forEach(cat => {
+    const div = document.createElement('div');
+    div.textContent = cat;
+    div.onclick = () => toggleCategoria(cat, div);
+    optionsBox.appendChild(div);
+  });
+}
+
+function toggleCategoria(cat, el) {
+  if (categoriasSelecionadas.includes(cat)) {
+    categoriasSelecionadas = categoriasSelecionadas.filter(c => c !== cat);
+    el.classList.remove('selected');
+  } else {
+    categoriasSelecionadas.push(cat);
+    el.classList.add('selected');
+  }
+
+  renderCategoriaTags();
+}
+
+function renderCategoriaTags() {
+  tagsBox.innerHTML = '';
+
+  if (categoriasSelecionadas.length === 0) {
+    placeholder.innerText = 'Selecionar categorias';
+    applyFilters();
+    return;
+  }
+
+  placeholder.innerText = `${categoriasSelecionadas.length} selecionada(s)`;
+
+  categoriasSelecionadas.forEach(cat => {
+    const tag = document.createElement('div');
+    tag.className = 'tag';
+    tag.innerHTML = `${cat} <span>×</span>`;
+
+    tag.querySelector('span').onclick = () => {
+      categoriasSelecionadas = categoriasSelecionadas.filter(c => c !== cat);
+
+      [...optionsBox.children].forEach(opt => {
+        if (opt.textContent === cat) opt.classList.remove('selected');
+      });
+
+      renderCategoriaTags();
+    };
+
+    tagsBox.appendChild(tag);
+  });
+
+  applyFilters();
+}
+
+/* =========================
+   BUILD ESTADOS (CORRIGIDO)
+========================= */
+function buildEstadoFilters() {
+  const select = document.getElementById('estadoFiltro');
+  select.innerHTML = '<option value="">Todos</option>';
+
+  const estados = new Set();
+  sites.forEach(s => s.estado && estados.add(s.estado));
+
+  [...estados].sort().forEach(e => {
+    select.innerHTML += `<option value="${normalizeText(e)}">${e}</option>`;
+  });
+}
+
+/* =========================
+   RENDER TABELA
 ========================= */
 function render() {
   const tbody = document.getElementById('tableBody');
   tbody.innerHTML = '';
 
-  filtered.forEach(s => {
+  const start = (currentPage - 1) * perPage;
+  const pageItems = filtered.slice(start, start + perPage);
+
+  pageItems.forEach(s => {
     const quantidade = Number(s.quantidade) || 1;
     const preco = Number(s.preco) || 0;
-
-    const unit =
-      quantidade > 1 ? (preco / quantidade).toFixed(2) : null;
+    const unit = (preco / quantidade).toFixed(2);
 
     const url = s.url
       ? s.url.startsWith('http')
@@ -279,75 +320,114 @@ function render() {
         : `https://${s.url}`
       : '#';
 
+    /* contato */
+    const contato = s.contato || '-';
+
+    /* whatsapp */
+    let whatsapp = '-';
+    if (s.whatsapp) {
+      const numero = s.whatsapp.replace(/\D/g, '');
+      whatsapp = `<a href="https://wa.me/${numero}" target="_blank">${s.whatsapp}</a>`;
+    }
+
     tbody.innerHTML += `
       <tr>
         <td>${s.nome || '-'}</td>
-
-        <td>
-          ${s.categorias.length
-            ? s.categorias.map(c => `<span class="tag">${c}</span>`).join('')
-            : '-'}
-        </td>
-
-        <td>
-          ${s.url ? `<a href="${url}" target="_blank">${s.url}</a>` : '-'}
-        </td>
-
+        <td>${s.categorias?.map(c => `<span class="tag">${c}</span>`).join('') || '-'}</td>
+        <td>${s.url ? `<a href="${url}" target="_blank">${s.url}</a>` : '-'}</td>
+        <td>${s.estado || '-'}</td>
         <td>${s.da || 0}</td>
         <td>${s.dr || 0}</td>
         <td>${s.spam || 0}%</td>
-
         <td>${quantidade}</td>
-
-        <td class="price-main">
-          R$ ${preco.toFixed(2)}
-        </td>
-
-        <td class="price-unit">
-          ${unit ? `R$ ${unit}/artigo` : '-'}
-        </td>
-
-        <td>${renderContato(s.contato)}</td>
-        <td>${renderContato(s.whatsapp)}</td>
+        <td>R$ ${preco.toFixed(2)}</td>
+        <td>R$ ${unit}</td>
+        <td>${contato}</td>
+        <td>${whatsapp}</td>
       </tr>
     `;
   });
+}
+
+
+/* =========================
+   PAGINATION
+========================= */
+function renderPagination() {
+  const container = document.getElementById('pagination');
+  container.innerHTML = '';
+
+  const totalPages = Math.ceil(filtered.length / perPage);
+
+  for (let i = 1; i <= totalPages; i++) {
+    const btn = document.createElement('button');
+    btn.innerText = i;
+    if (i === currentPage) btn.classList.add('active');
+
+    btn.onclick = () => {
+      currentPage = i;
+      render();
+      renderPagination();
+    };
+
+    container.appendChild(btn);
+  }
 }
 
 /* =========================
    STATS
 ========================= */
 function updateStats() {
-  document.getElementById('statSites').innerText = sites.length;
+  document.getElementById('statSites').innerText = filtered.length;
 
   const categorias = new Set();
   let totalDA = 0;
 
-  sites.forEach(s => {
-    s.categorias.forEach(c => categorias.add(c));
+  filtered.forEach(s => {
+    s.categorias?.forEach(c => categorias.add(c));
     totalDA += Number(s.da) || 0;
   });
 
   document.getElementById('statNichos').innerText = categorias.size;
   document.getElementById('statDA').innerText =
-    Math.round(totalDA / sites.length) || 0;
+    filtered.length ? Math.round(totalDA / filtered.length) : 0;
 }
 
 /* =========================
-   CATEGORIA FILTER BUILDER
+   CLEAR FILTERS
 ========================= */
-function buildCategoriaFilters() {
-  const box = document.getElementById('nichoFilters');
-  box.innerHTML = '';
+function clearFilters() {
+  document.getElementById('searchInput').value = '';
+  document.getElementById('estadoFiltro').value = '';
 
-  const set = new Set();
-  sites.forEach(s => s.categorias.forEach(c => set.add(c)));
+  categoriasSelecionadas = [];
+  tagsBox.innerHTML = '';
+  placeholder.innerText = 'Selecionar categorias';
+  [...optionsBox.children].forEach(opt => opt.classList.remove('selected'));
 
-  [...set].sort().forEach(cat => {
-    box.innerHTML += `
-      <label>
-        <input type="checkbox" value="${cat}"> ${cat}
-      </label>
-    `;
-  });
+  ['daMin','drMin'].forEach(id => document.getElementById(id).value = 0);
+  ['daMax','drMax'].forEach(id => document.getElementById(id).value = 100);
+  ['daRange','drRange'].forEach(id => document.getElementById(id).value = 100);
+  ['daValue','drValue'].forEach(id => document.getElementById(id).innerText = 100);
+
+  document.getElementById('precoMin').value = 0;
+  document.getElementById('precoMax').value = 999999;
+  document.getElementById('unitMin').value = 0;
+  document.getElementById('unitMax').value = 999999;
+  document.getElementById('qtdMin').value = 1;
+  document.getElementById('qtdMax').value = 999;
+
+  filtered = [...sites];
+  currentPage = 1;
+  render();
+  updateStats();
+  renderPagination();
+  closeFilters();
+}
+
+/* =========================
+   UI
+========================= */
+function closeFilters() {
+  filtersBox.classList.remove('open');
 }
