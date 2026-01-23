@@ -1,5 +1,5 @@
 const API_URL =
-  'https://script.google.com/macros/s/AKfycbzbjJ0ypZ44ljNBwK5-zJ5q-94I7xGnL0X697qza2s5YuSisczn731YfA9CIeKI0ZST/exec';
+  'https://script.google.com/macros/s/AKfycbyRvMpqEfByIiN3zbrZSOgGgjdoMHO2Hw_glGKjkBCwEoDeLZz4noPzNrX6rRygmTOj/exec';
 
 let sites = [];
 let filtered = [];
@@ -336,12 +336,13 @@ function render() {
         <td>${s.categorias?.map(c => `<span class="tag">${c}</span>`).join('') || '-'}</td>
         <td>${s.url ? `<a href="${url}" target="_blank">${s.url}</a>` : '-'}</td>
         <td>${s.estado || '-'}</td>
-        <td>${s.da || 0}</td>
+        <td class="${Number(s.da || 0) < 20 ? 'danger' : ''}">${s.da || 0}</td>
         <td>${s.dr || 0}</td>
-        <td>${s.spam || 0}%</td>
+        <td>${s.trafego || '-'}</td>
+        <td class="${Number(s.spam || 0) > 10 ? 'danger' : ''}">${s.spam || 0}%</td>
         <td>${quantidade}</td>
-        <td>R$ ${preco.toFixed(2)}</td>
         <td>R$ ${unit}</td>
+        <td>R$ ${preco.toFixed(2)}</td>        
         <td>${contato}</td>
         <td>${whatsapp}</td>
       </tr>
