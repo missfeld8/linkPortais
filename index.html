@@ -61,15 +61,16 @@
           <th>Categorias</th>
           <th>URL</th>
           <th>Estado</th>
-          <th>DA - Moz</th>
-          <th>DR - SemRush</th>
-          <th>Tráfego Sem Rush</th>
-          <th>Spam Score</th>
-          <th>Qtd</th>
-          <th>Preço Unit.</th>
-          <th>Preço Pacote</th>
-          <th>Contato</th>
-          <th>WhatsApp</th>
+          <th id="th-da">DA - Moz</th>
+          <th id="th-dr">DR - SemRush</th>
+          <th id="th-trafego1">Tráfego Sem Rush</th>
+          <th id="th-trafego2">Tráfego Ahrefz</th>
+          <th id="th-spam">Spam Score</th>
+          <th id="th-qtd">Qtd</th>
+          <th id="th-preco-unit">Preço Unit.</th>
+          <th id="th-preco-pacote">Preço Pacote</th>
+          <th id="th-contato">Contato</th>
+          <th id="th-whatsapp">WhatsApp</th>
         </tr>
       </thead>
       <tbody id="tableBody"></tbody>
@@ -98,25 +99,21 @@
     </select>
   </div>
 
-  <!-- CATEGORIAS (MULTISELECT PROFISSIONAL) -->
+  <!-- CATEGORIAS -->
   <div class="filter-group">
     <strong>Categorias</strong>
 
-    <!-- Campo principal -->
     <div class="custom-multiselect" id="categoriaSelect">
       <span id="categoriaPlaceholder">Selecionar categorias</span>
       <span class="arrow">▾</span>
     </div>
 
-    <!-- Lista dropdown -->
     <div class="multiselect-options" id="categoriaOptions"></div>
-
-    <!-- Selecionadas -->
     <div class="selected-tags" id="categoriaTags"></div>
   </div>
 
   <!-- DA -->
-  <div class="filter-group">
+  <div class="filter-group" id="filter-da">
     <strong>Domain Authority (DA)</strong>
 
     <div class="range-inputs">
@@ -130,7 +127,7 @@
   </div>
 
   <!-- DR -->
-  <div class="filter-group">
+  <div class="filter-group" id="filter-dr">
     <strong>Domain Rating (DR)</strong>
 
     <div class="range-inputs">
@@ -143,8 +140,28 @@
     <small>Máx selecionado: <strong id="drValue">100</strong></small>
   </div>
 
+  <!-- TRÁFEGO SEMRUSH -->
+  <div class="filter-group" id="filter-trafego1">
+    <strong>Tráfego SemRush</strong>
+    <div class="range-inputs">
+      <input type="number" id="trafegoMin" value="0" min="0" placeholder="mín">
+      <span>até</span>
+      <input type="number" id="trafegoMax" value="999999999" min="0" placeholder="máx">
+    </div>
+  </div>
+
+  <!-- TRÁFEGO AHREFS -->
+  <div class="filter-group" id="filter-trafego2">
+    <strong>Tráfego Ahrefs</strong>
+    <div class="range-inputs">
+      <input type="number" id="trafego2Min" value="0" min="0" placeholder="mín">
+      <span>até</span>
+      <input type="number" id="trafego2Max" value="999999999" min="0" placeholder="máx">
+    </div>
+  </div>
+
   <!-- PREÇO PACOTE -->
-  <div class="filter-group">
+  <div class="filter-group" id="filter-preco-pacote">
     <strong>Preço do Pacote (R$)</strong>
     <div class="range-inputs">
       <input type="number" id="precoMin" value="0" min="0">
@@ -154,7 +171,7 @@
   </div>
 
   <!-- PREÇO UNITÁRIO -->
-  <div class="filter-group">
+  <div class="filter-group" id="filter-preco-unit">
     <strong>Preço Unitário (R$)</strong>
     <div class="range-inputs">
       <input type="number" id="unitMin" value="0" min="0">
@@ -164,7 +181,7 @@
   </div>
 
   <!-- QUANTIDADE -->
-  <div class="filter-group">
+  <div class="filter-group" id="filter-qtd">
     <strong>Quantidade de Artigos</strong>
     <div class="range-inputs">
       <input type="number" id="qtdMin" value="1" min="1">
@@ -182,7 +199,6 @@
 </aside>
 
 <script src="assets/js/main.js"></script>
-
 
 <!-- ================= SYNC RANGE + INPUT ================= -->
 <script>

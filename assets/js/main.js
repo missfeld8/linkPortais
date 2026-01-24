@@ -1,5 +1,26 @@
-const API_URL =
-  'https://script.google.com/macros/s/AKfycbyRvMpqEfByIiN3zbrZSOgGgjdoMHO2Hw_glGKjkBCwEoDeLZz4noPzNrX6rRygmTOj/exec';
+/* =========================
+   AUTH GATEWAY CONFIG 🔐
+========================= */
+const AUTH_API =
+  'https://script.google.com/macros/s/AKfycbw7bGr_QOhkVRKzrVfZj9Wrkax1hTqqNKs8LdO1Nw03bsi93bq2YPXjrQiPW0FzpSe4/exec';
+
+// domínio atual automático (SEM BARRA)
+const CLIENT_DOMAIN = window.location.origin;
+
+/* =========================
+   CONTROLE DE VISIBILIDADE DE COLUNAS (HARDCODED)
+========================= */
+
+const hideDA              = false;
+const hideDR              = false;
+const hideTrafegoSemRush  = false;
+const hideTrafegoAhrefz   = false;
+const hideSpam            = false;
+const hideQuantidade      = true;
+const hidePrecoUnitario   = true;
+const hidePrecoPacote     = false;
+const hideContato         = true;
+const hideWhatsapp        = true;
 
 let sites = [];
 let filtered = [];
@@ -26,6 +47,7 @@ let tagsBox;
 let placeholder;
 
 let categoriasSelecionadas = [];
+
 
 /* =========================
    DOM READY
@@ -85,15 +107,59 @@ document.addEventListener('DOMContentLoaded', () => {
     document.body.classList.add('dark');
   }
 
-  if (dataReady) inicializarSistema();
+  // 🔐 INICIA SISTEMA VIA AUTH
+  carregarViaAuth();
 });
 
+
 /* =========================
-   JSONP CALLBACK
+   LOAD VIA AUTH (GATEWAY 🔐)
+========================= */
+function carregarViaAuth() {
+  const script = document.createElement('script');
+
+  const authURL =
+    AUTH_API +
+    '?origin=' + encodeURIComponent(CLIENT_DOMAIN) +
+    '&callback=handleAuth';
+
+  script.src = authURL;
+  document.body.appendChild(script);
+}
+
+
+/* =========================
+   CALLBACK AUTH
+========================= */
+function handleAuth(resp) {
+  if (!resp || !resp.autorizado) {
+    console.error('Acesso não autorizado:', resp?.erro || resp);
+    alert('Acesso não autorizado ao sistema.');
+    return;
+  }
+
+  const realEndpoint = resp.endpoint;
+  const key = resp.key;
+
+  // 🔥 CHAMADA FINAL AO SCRIPT DE DADOS
+  const finalURL =
+    realEndpoint +
+    '?key=' + encodeURIComponent(key) +
+    '&origin=' + encodeURIComponent(CLIENT_DOMAIN) +
+    '&callback=handleData';
+  const script = document.createElement('script');
+  script.src = finalURL;
+  document.body.appendChild(script);
+}
+
+
+/* =========================
+   JSONP CALLBACK (DADOS)
 ========================= */
 function handleData(data) {
   if (!Array.isArray(data)) {
-    console.error('Resposta inválida:', data);
+    console.error('Resposta inválida (não é array):', data);
+    alert('Erro ao carregar dados.');
     return;
   }
 
@@ -105,6 +171,7 @@ function handleData(data) {
   if (domReady) inicializarSistema();
 }
 
+
 /* =========================
    INICIALIZAÇÃO SEGURA
 ========================= */
@@ -112,16 +179,9 @@ function inicializarSistema() {
   buildCategoriaFilters();
   buildEstadoFilters();
   applyFilters();
+  aplicarVisibilidadeColunas();
 }
 
-/* =========================
-   LOAD DATA (JSONP)
-========================= */
-(function loadSites() {
-  const script = document.createElement('script');
-  script.src = `${API_URL}?callback=handleData`;
-  document.body.appendChild(script);
-})();
 
 /* =========================
    HELPERS
@@ -136,7 +196,6 @@ function getText(id) {
   return el ? el.value.trim().toLowerCase() : '';
 }
 
-/* 🔥 NORMALIZA TEXTO (CORRIGE ACENTOS, ESPAÇOS, MAIÚSCULAS) */
 function normalizeText(text) {
   return (text || '')
     .toString()
@@ -145,6 +204,21 @@ function normalizeText(text) {
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '');
 }
+
+function parseTraffic(value) {
+  if (!value) return 0;
+
+  const text = value.toString().toLowerCase().trim();
+
+  if (text.endsWith('k')) {
+    const num = parseFloat(text.replace('k', ''));
+    return Math.round(num * 1000);
+  }
+
+  const n = Number(text.replace(/[^\d.]/g, ''));
+  return isNaN(n) ? 0 : n;
+}
+
 
 /* =========================
    APPLY FILTERS
@@ -171,6 +245,12 @@ function applyFilters() {
   const qtdMin = getValue('qtdMin', 1);
   const qtdMax = getValue('qtdMax', 999);
 
+  const trafegoMin = getValue('trafegoMin', 0);
+  const trafegoMax = getValue('trafegoMax', 999999999);
+
+  const trafego2Min = getValue('trafego2Min', 0);
+  const trafego2Max = getValue('trafego2Max', 999999999);
+
   filtered = sites.filter(s => {
     const nome = normalizeText(s.nome);
     const url = normalizeText(s.url);
@@ -181,7 +261,9 @@ function applyFilters() {
     const precoPacote = Number(s.preco) || 0;
     const precoUnit = precoPacote / quantidade;
 
-    /* BUSCA */
+    const trafego = parseTraffic(s.trafego);
+    const trafego2 = parseTraffic(s.trafego2);
+
     if (
       q &&
       !(
@@ -192,25 +274,23 @@ function applyFilters() {
       )
     ) return false;
 
-    /* ESTADO (AGORA FUNCIONA PERFEITO) */
     if (estadoFiltro && estado !== estadoFiltro) return false;
 
-    /* CATEGORIAS */
     if (
       categoriasSelecionadas.length &&
       !categoriasSelecionadas.some(c => categorias.includes(c))
     ) return false;
 
-    /* MÉTRICAS */
     if (+s.da < daMin || +s.da > daMax) return false;
     if (+s.dr < drMin || +s.dr > drMax) return false;
 
-    /* PREÇOS */
     if (precoPacote < precoMin || precoPacote > precoMax) return false;
     if (precoUnit < unitMin || precoUnit > unitMax) return false;
 
-    /* QUANTIDADE */
     if (quantidade < qtdMin || quantidade > qtdMax) return false;
+
+    if (trafego < trafegoMin || trafego > trafegoMax) return false;
+    if (trafego2 < trafego2Min || trafego2 > trafego2Max) return false;
 
     return true;
   });
@@ -285,7 +365,7 @@ function renderCategoriaTags() {
 }
 
 /* =========================
-   BUILD ESTADOS (CORRIGIDO)
+   BUILD ESTADOS
 ========================= */
 function buildEstadoFilters() {
   const select = document.getElementById('estadoFiltro');
@@ -320,10 +400,8 @@ function render() {
         : `https://${s.url}`
       : '#';
 
-    /* contato */
     const contato = s.contato || '-';
 
-    /* whatsapp */
     let whatsapp = '-';
     if (s.whatsapp) {
       const numero = s.whatsapp.replace(/\D/g, '');
@@ -336,20 +414,23 @@ function render() {
         <td>${s.categorias?.map(c => `<span class="tag">${c}</span>`).join('') || '-'}</td>
         <td>${s.url ? `<a href="${url}" target="_blank">${s.url}</a>` : '-'}</td>
         <td>${s.estado || '-'}</td>
-        <td class="${Number(s.da || 0) < 20 ? 'danger' : ''}">${s.da || 0}</td>
-        <td>${s.dr || 0}</td>
-        <td>${s.trafego || '-'}</td>
-        <td class="${Number(s.spam || 0) > 10 ? 'danger' : ''}">${s.spam || 0}%</td>
-        <td>${quantidade}</td>
-        <td>R$ ${unit}</td>
-        <td>R$ ${preco.toFixed(2)}</td>        
-        <td>${contato}</td>
-        <td>${whatsapp}</td>
+
+        <td class="col-da ${Number(s.da || 0) < 20 ? 'danger' : ''}">${s.da || 0}</td>
+        <td class="col-dr">${s.dr || 0}</td>
+        <td class="col-trafego1">${s.trafego || '-'}</td>
+        <td class="col-trafego2">${s.trafego2 || '-'}</td>
+        <td class="col-spam ${Number(s.spam || 0) > 10 ? 'danger' : ''}">${s.spam || 0}%</td>
+        <td class="col-qtd">${quantidade}</td>
+        <td class="col-preco-unit">R$ ${unit}</td>
+        <td class="col-preco-pacote">R$ ${preco.toFixed(2)}</td>
+        <td class="col-contato">${contato}</td>
+        <td class="col-whatsapp">${whatsapp}</td>
       </tr>
     `;
   });
-}
 
+  aplicarVisibilidadeColunas(); // 👈 aplica após cada render
+}
 
 /* =========================
    PAGINATION
@@ -417,6 +498,10 @@ function clearFilters() {
   document.getElementById('unitMax').value = 999999;
   document.getElementById('qtdMin').value = 1;
   document.getElementById('qtdMax').value = 999;
+  document.getElementById('trafegoMin').value = 0;
+  document.getElementById('trafegoMax').value = 999999999;
+  document.getElementById('trafego2Min').value = 0;
+  document.getElementById('trafego2Max').value = 999999999;
 
   filtered = [...sites];
   currentPage = 1;
@@ -424,6 +509,39 @@ function clearFilters() {
   updateStats();
   renderPagination();
   closeFilters();
+}
+
+/* =========================
+   VISIBILIDADE DE COLUNAS + FILTROS (FINAL)
+========================= */
+function aplicarVisibilidadeColunas() {
+  const map = [
+    { hide: hideDA,             th: 'th-da',            td: 'col-da',            filter: 'filter-da' },
+    { hide: hideDR,             th: 'th-dr',            td: 'col-dr',            filter: 'filter-dr' },
+    { hide: hideTrafegoSemRush, th: 'th-trafego1',      td: 'col-trafego1',      filter: 'filter-trafego1' },
+    { hide: hideTrafegoAhrefz,  th: 'th-trafego2',      td: 'col-trafego2',      filter: 'filter-trafego2' },
+    { hide: hideQuantidade,     th: 'th-qtd',           td: 'col-qtd',           filter: 'filter-qtd' },
+    { hide: hidePrecoUnitario,  th: 'th-preco-unit',   td: 'col-preco-unit',   filter: 'filter-preco-unit' },
+    { hide: hidePrecoPacote,    th: 'th-preco-pacote', td: 'col-preco-pacote', filter: 'filter-preco-pacote' },
+    { hide: hideContato,        th: 'th-contato',       td: 'col-contato' },
+    { hide: hideWhatsapp,       th: 'th-whatsapp',      td: 'col-whatsapp' },
+  ];
+
+  map.forEach(col => {
+    const th = document.getElementById(col.th);
+    const tds = document.querySelectorAll(`.${col.td}`);
+    const filter = col.filter ? document.getElementById(col.filter) : null;
+
+    if (col.hide) {
+      if (th) th.style.display = 'none';
+      tds.forEach(td => (td.style.display = 'none'));
+      if (filter) filter.style.display = 'none';
+    } else {
+      if (th) th.style.display = '';
+      tds.forEach(td => (td.style.display = ''));
+      if (filter) filter.style.display = '';
+    }
+  });
 }
 
 /* =========================
