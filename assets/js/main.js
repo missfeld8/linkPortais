@@ -251,7 +251,7 @@ function applyFilters() {
   const trafego2Min = getValue('trafego2Min', 0);
   const trafego2Max = getValue('trafego2Max', 999999999);
 
-    const trafego3Min = getValue('trafego3Min', 0);
+  const trafego3Min = getValue('trafego3Min', 0);
   const trafego3Max = getValue('trafego3Max', 999999999);
 
   filtered = sites.filter(s => {
@@ -266,6 +266,7 @@ function applyFilters() {
 
     const trafego = parseTraffic(s.trafego);
     const trafego2 = parseTraffic(s.trafego2);
+    const trafego3 = parseTraffic(s.trafego3);
 
     if (
       q &&
