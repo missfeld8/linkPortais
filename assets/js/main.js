@@ -251,8 +251,8 @@ function applyFilters() {
   const trafego2Min = getValue('trafego2Min', 0);
   const trafego2Max = getValue('trafego2Max', 999999999);
 
-  const drahrefs = getValue('drahrefsMin', 0);
-  const drahrefs = getValue('drahrefsMax', 100);
+  const drahrefsMin = getValue('drahrefsMin', 0);
+  const drahrefsMax = getValue('drahrefsMax', 100);
 
   filtered = sites.filter(s => {
     const nome = normalizeText(s.nome);
