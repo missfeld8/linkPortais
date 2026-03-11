@@ -157,6 +157,10 @@ function handleAuth(resp) {
    JSONP CALLBACK (DADOS)
 ========================= */
 function handleData(data) {
+  console.log("Dados recebidos da API:", data);
+  console.log("Primeiro site:", data[0]);
+  console.log("DR Ahrefs:", data[0].drahrefs);
+
   if (!Array.isArray(data)) {
     console.error('Resposta inválida (não é array):', data);
     alert('Erro ao carregar dados.');
@@ -479,23 +483,6 @@ function updateStats() {
   document.getElementById('statNichos').innerText = categorias.size;
   document.getElementById('statDA').innerText =
     filtered.length ? Math.round(totalDA / filtered.length) : 0;
-}
-
-function handleData(data) {
-  console.log("Dados recebidos da API:", data);
-
-  if (!Array.isArray(data)) {
-    console.error('Resposta inválida (não é array):', data);
-    alert('Erro ao carregar dados.');
-    return;
-  }
-
-  sites = data;
-  filtered = [...data];
-
-  dataReady = true;
-
-  if (domReady) inicializarSistema();
 }
 
 /* =========================
