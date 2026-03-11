@@ -251,8 +251,8 @@ function applyFilters() {
   const trafego2Min = getValue('trafego2Min', 0);
   const trafego2Max = getValue('trafego2Max', 999999999);
 
-  const trafego3Min = getValue('trafego3Min', 0);
-  const trafego3Max = getValue('trafego3Max', 999999999);
+  const drahrefs = getValue('drahrefsMin', 0);
+  const drahrefs = getValue('drahrefsMax', 100);
 
   filtered = sites.filter(s => {
     const nome = normalizeText(s.nome);
@@ -266,7 +266,7 @@ function applyFilters() {
 
     const trafego = parseTraffic(s.trafego);
     const trafego2 = parseTraffic(s.trafego2);
-    const trafego3 = Number(s.dr2) || 0;
+    const drahrefs = Number(s.dr2) || 0;
 
     if (
       q &&
@@ -295,7 +295,7 @@ function applyFilters() {
 
     if (trafego < trafegoMin || trafego > trafegoMax) return false;
     if (trafego2 < trafego2Min || trafego2 > trafego2Max) return false;
-    if (trafego3 < trafego3Min || trafego3 > trafego3Max) return false;
+    if (drahrefs < drahrefsMin || drahrefs > drahrefsMax) return false;
 
     return true;
   });
@@ -508,8 +508,8 @@ function clearFilters() {
   document.getElementById('trafegoMax').value = 999999999;
   document.getElementById('trafego2Min').value = 0;
   document.getElementById('trafego2Max').value = 999999999;
-  document.getElementById('trafego3Min').value = 0;
-  document.getElementById('trafego3Max').value = 999999999;
+  document.getElementById('drahrefsMin').value = 0;
+  document.getElementById('drahrefsMax').value = 100;
 
   filtered = [...sites];
   currentPage = 1;
