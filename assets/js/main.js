@@ -481,6 +481,23 @@ function updateStats() {
     filtered.length ? Math.round(totalDA / filtered.length) : 0;
 }
 
+function handleData(data) {
+  console.log("Dados recebidos da API:", data);
+
+  if (!Array.isArray(data)) {
+    console.error('Resposta inválida (não é array):', data);
+    alert('Erro ao carregar dados.');
+    return;
+  }
+
+  sites = data;
+  filtered = [...data];
+
+  dataReady = true;
+
+  if (domReady) inicializarSistema();
+}
+
 /* =========================
    CLEAR FILTERS
 ========================= */
