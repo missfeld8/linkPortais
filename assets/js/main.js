@@ -266,7 +266,7 @@ function applyFilters() {
 
     const trafego = parseTraffic(s.trafego);
     const trafego2 = parseTraffic(s.trafego2);
-    const trafego3 = parseTraffic(s.trafego3);
+    const trafego3 = Number(s.dr2) || 0;
 
     if (
       q &&
@@ -422,6 +422,7 @@ function render() {
 
         <td class="col-da ${Number(s.da || 0) < 20 ? 'danger' : ''}">${s.da || 0}</td>
         <td class="col-dr">${s.dr || 0}</td>
+        <td class="col-dr2">${s.dr2 || 0}</td>
         <td class="col-trafego1">${s.trafego || '-'}</td>
         <td class="col-trafego2">${s.trafego2 || '-'}</td>
         <td class="col-spam ${Number(s.spam || 0) > 10 ? 'danger' : ''}">${s.spam || 0}%</td>
