@@ -1,5 +1,5 @@
 /* =========================
-   AUTH GATEWAY CONFIG 🔐
+   AUTH GATEWAY CONFIG 
 ========================= */
 const AUTH_API =
   'https://script.google.com/macros/s/AKfycbw7bGr_QOhkVRKzrVfZj9Wrkax1hTqqNKs8LdO1Nw03bsi93bq2YPXjrQiPW0FzpSe4/exec';
@@ -16,8 +16,8 @@ const hideDR              = false;
 const hideTrafegoSemRush  = false;
 const hideTrafegoAhrefz   = false;
 const hideSpam            = false;
-const hideQuantidade      = true;
-const hidePrecoUnitario   = true;
+const hideQuantidade      = false;
+const hidePrecoUnitario   = false;
 const hidePrecoPacote     = false;
 const hideContato         = true;
 const hideWhatsapp        = true;
@@ -92,7 +92,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   document.getElementById('closeFilters').addEventListener('click', closeFilters);
 
-  /* 🌙 DARK MODE */
+  /* DARK MODE */
   const toggleTheme = document.getElementById('toggleTheme');
 
   toggleTheme.addEventListener('click', () => {
@@ -107,7 +107,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.body.classList.add('dark');
   }
 
-  // 🔐 INICIA SISTEMA VIA AUTH
+  // INICIA SISTEMA VIA AUTH
   carregarViaAuth();
 });
 
@@ -141,7 +141,7 @@ function handleAuth(resp) {
   const realEndpoint = resp.endpoint;
   const key = resp.key;
 
-  // 🔥 CHAMADA FINAL AO SCRIPT DE DADOS
+
   const finalURL =
     realEndpoint +
     '?key=' + encodeURIComponent(key) +
@@ -439,7 +439,7 @@ function render() {
     `;
   });
 
-  aplicarVisibilidadeColunas(); // 👈 aplica após cada render
+  aplicarVisibilidadeColunas(); // aplica após cada render
 }
 
 /* =========================
